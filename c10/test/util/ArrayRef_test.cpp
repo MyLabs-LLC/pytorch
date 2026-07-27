@@ -3,6 +3,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <limits>
 #include <utility>
 #include <vector>
 
@@ -40,6 +41,21 @@ TEST(ArrayRefTest, ctor_from_container_test) {
 
   EXPECT_EQ(std::as_const(test_vec), test_ref_mspan);
   EXPECT_EQ(std::as_const(test_vec), test_ref_cspan);
+}
+
+TEST(ArrayRefTest, slice_bounds) {
+  std::vector<int> vec{1, 2, 3, 4};
+  c10::ArrayRef<int> ref(vec);
+
+  EXPECT_EQ(ref.slice(1, 2).size(), 2u);
+  EXPECT_EQ(ref.slice(1, 2)[0], 2);
+  EXPECT_EQ(ref.slice(4, 0).size(), 0u);
+
+  // N + M would wrap around size_t; must still be rejected.
+  constexpr size_t huge = std::numeric_limits<size_t>::max() - 1;
+  EXPECT_THROW(ref.slice(2, huge), c10::Error);
+  EXPECT_THROW(ref.slice(5, 0), c10::Error);
+  EXPECT_THROW(ref.slice(0, 5), c10::Error);
 }
 
 } // namespace

@@ -181,8 +181,9 @@ class HeaderOnlyArrayRef {
 
   /// slice(n, m) - Take M elements of the array starting at element N
   constexpr HeaderOnlyArrayRef<T> slice(size_t N, size_t M) const {
+    // Check N and M separately to avoid size_t overflow in N + M.
     STD_TORCH_CHECK(
-        N + M <= this->size(),
+        N <= this->size() && M <= this->size() - N,
         "HeaderOnlyArrayRef: invalid slice, N = ",
         N,
         "; M = ",

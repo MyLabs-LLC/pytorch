@@ -2,6 +2,8 @@
 
 #include <torch/headeronly/util/HeaderOnlyArrayRef.h>
 
+#include <limits>
+#include <stdexcept>
 #include <vector>
 
 using torch::headeronly::HeaderOnlyArrayRef;
@@ -31,6 +33,16 @@ TEST(TestHeaderOnlyArrayRef, TestAPIs) {
   EXPECT_EQ(arr.front(), 1);
   EXPECT_EQ(arr.back(), 7);
   ASSERT_TRUE(arr.slice(3, 4).equals(arr.slice(3)));
+}
+
+TEST(TestHeaderOnlyArrayRef, TestSliceOverflowRejected) {
+  std::vector<int> vec = {1, 2, 3, 4};
+  HeaderOnlyArrayRef<int> arr(vec);
+  constexpr size_t huge = std::numeric_limits<size_t>::max() - 1;
+  // N + M would wrap; the overflow-safe check must still reject this.
+  EXPECT_THROW(arr.slice(2, huge), std::runtime_error);
+  EXPECT_THROW(arr.slice(5, 0), std::runtime_error);
+  EXPECT_THROW(arr.slice(0, 5), std::runtime_error);
 }
 
 TEST(TestHeaderOnlyArrayRef, TestFromInitializerList) {

@@ -299,8 +299,12 @@ def _nvrtc_compile(
             options.append(f"-I{directory}".encode())
 
     # Enable automatic precompiled headers (CUDA 12.8+)
+    # Use TorchVersion so multi-digit minors (e.g. 12.10) compare numerically,
+    # not lexicographically via plain str comparison.
     if auto_pch:
-        if str(torch.version.cuda) < "12.8":
+        from torch.torch_version import TorchVersion
+
+        if TorchVersion(str(torch.version.cuda)) < "12.8":
             raise AssertionError(f"PCH requires CUDA 12.8+, got {torch.version.cuda}")
         if nvcc_options is None:
             nvcc_options = []
