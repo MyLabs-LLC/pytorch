@@ -6,11 +6,11 @@ on:
     branches:
       - main
     paths:
-      - scripts/lumen_cli/**
+      - .ci/lumen_cli/**
       - .github/workflows/tools-unit-tests.yml
   pull_request:
     paths:
-      - scripts/lumen_cli/**
+      - .ci/lumen_cli/**
       - .github/workflows/tools-unit-tests.yml
 
 concurrency:
@@ -21,7 +21,6 @@ jobs:
   lumen-cli-unit-tests-python312:
     permissions:
       contents: read
-      pull-requests: write
     if: ${{ github.repository_owner == 'pytorch' }}
     runs-on: ubuntu-24.04
     steps:
@@ -37,7 +36,6 @@ jobs:
           cache: pip
 
       - name: Run tests
-        continue-on-error: true
         run: |
           set -ex
           python3 -m venv /tmp/venv
@@ -45,10 +43,9 @@ jobs:
           pip install -e '.ci/lumen_cli/[test]'
           pytest -v -s .ci/lumen_cli/tests/*
 
-  lumen-cli-compatible-python39:
+  lumen-cli-compatible-python310:
     permissions:
       contents: read
-      pull-requests: write
     if: ${{ github.repository_owner == 'pytorch' }}
     runs-on: ubuntu-24.04
     steps:
@@ -63,7 +60,6 @@ jobs:
           python-version: '3.10'
           cache: 'pip'
       - name: Run tests
-        continue-on-error: true
         run: |
           set -ex
           python3 -m venv /tmp/venv

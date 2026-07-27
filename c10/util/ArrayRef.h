@@ -101,8 +101,9 @@ class ArrayRef : public HeaderOnlyArrayRef<T> {
   /// We deviate from HeaderOnlyArrayRef by using TORCH_CHECK instead of
   /// STD_TORCH_CHECK
   [[nodiscard]] constexpr ArrayRef<T> slice(size_t N, size_t M) const {
+    // Check N and M separately to avoid size_t overflow in N + M.
     TORCH_CHECK(
-        N + M <= this->size(),
+        N <= this->size() && M <= this->size() - N,
         "ArrayRef: invalid slice, N = ",
         N,
         "; M = ",
